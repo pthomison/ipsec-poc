@@ -5,8 +5,6 @@ PROJECT_DIR="$(realpath $SCRIPTS_DIR/../)"
 
 pushd $PROJECT_DIR
 
-rm -rf ./images
-
-packer build packer.json
+terraform destroy -auto-approve
 
 popd

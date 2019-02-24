@@ -44,7 +44,7 @@ resource "libvirt_domain" "east" {
 }
 
 resource "libvirt_volume" "west-vm-root-disk" {
-  name = "east-vm-root-disk"
+  name = "west-vm-root-disk"
   source = "http://127.0.0.1:8089/west.qcow2"
 }
 
