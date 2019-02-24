@@ -43,8 +43,25 @@ resource "libvirt_domain" "east" {
   }
 }
 
-# resource "libvirt_domain" "west" {
-#   name = "west"
-#   memory = "4096"
-#   vcpu = 2
-# }
+resource "libvirt_volume" "west-vm-root-disk" {
+  name = "east-vm-root-disk"
+  source = "http://127.0.0.1:8089/west.qcow2"
+}
+
+resource "libvirt_domain" "west" {
+  name = "west"
+  memory = "4096"
+  vcpu = 2
+
+  disk {
+    volume_id = "${libvirt_volume.west-vm-root-disk.id}"
+  }
+
+  network_interface {
+    network_id = "${libvirt_network.ipsec_net.id}"
+    hostname = "west"
+    addresses = ["10.17.3.4"]
+    mac = "AA:BB:CC:11:33:33"
+    wait_for_lease = true
+  }
+}
