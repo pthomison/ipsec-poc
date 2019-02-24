@@ -1,0 +1,43 @@
+{
+ "variables":
+ {},
+ "builders":
+ [{"name": "east",
+   "type": "qemu",
+   "iso_url": "/ISOs/CentOS-7-x86_64-DVD-1810.iso",
+   "iso_checksum": "6d44331cc4f6c506c7bbe9feb8468fad6c51a88ca1393ca6b8b486ea04bec3c1",
+   "iso_checksum_type": "sha256",
+   "headless": "false",
+   "output_directory": "images",
+   "vm_name": "east",
+   "accelerator": "kvm",
+   "disk_size": "20480",
+   "boot_wait": "5s",
+   "http_directory": "ks",
+   "boot_command": [ "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/east-kickstart <enter><wait>" ],
+   "ssh_username": "root",
+   "ssh_password": "r3dh4t1!",
+   "ssh_wait_timeout":"1000s",
+   "shutdown_command": "shutdown -P now",
+   "format": "qcow2"
+   },
+   { "name": "west",
+     "type": "qemu",
+     "iso_url": "/ISOs/CentOS-7-x86_64-DVD-1810.iso",
+     "iso_checksum": "6d44331cc4f6c506c7bbe9feb8468fad6c51a88ca1393ca6b8b486ea04bec3c1",
+     "iso_checksum_type": "sha256",
+     "headless": "false",
+     "output_directory": "images",
+     "vm_name": "west",
+     "accelerator": "kvm",
+     "disk_size": "20480",
+     "boot_wait": "5s",
+     "http_directory": "ks",
+     "boot_command": [ "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/west-kickstart <enter><wait>" ],
+     "ssh_username": "root",
+     "ssh_password": "r3dh4t1!",
+     "ssh_wait_timeout":"1000s",
+     "shutdown_command": "shutdown -P now",
+     "format": "qcow2"
+     }]
+}
