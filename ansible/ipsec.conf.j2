@@ -1,0 +1,17 @@
+# /etc/ipsec.conf
+# The version 2 is only required for compatibility with openswan
+version 2
+
+config setup
+    protostack=netkey
+
+conn mytunnel
+    leftid=@west
+    left={{ hostvars[groups['all'][0]]['tun_ip'] }}
+    leftrsasigkey={{ hostvars[hostvars[groups['all'][0]]['tunnel_partner']]['host_pub_key']['stdout'] }}
+    rightid=@east
+    right={{ hostvars[groups['all'][1]]['tun_ip'] }}
+    rightrsasigkey={{ hostvars[hostvars[groups['all'][1]]['tunnel_partner']]['host_pub_key']['stdout'] }}
+    authby=rsasig
+    # use auto=start when done testing the tunnel
+    auto=add

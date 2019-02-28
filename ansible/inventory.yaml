@@ -1,0 +1,11 @@
+---
+all:
+  hosts:
+    east.ipsec.local:
+      ansible_host: "10.17.3.3"
+      tun_ip: "10.22.3.3"
+      tunnel_partner: "west.ipsec.local"
+    west.ipsec.local:
+      ansible_host: "10.17.3.4"
+      tunnel_partner: "east.ipsec.local"
+      tun_ip: "10.22.3.4"

@@ -1,43 +1,54 @@
 {
- "variables":
- {},
- "builders":
- [{"name": "east",
-   "type": "qemu",
-   "iso_url": "/ISOs/CentOS-7-x86_64-DVD-1810.iso",
-   "iso_checksum": "6d44331cc4f6c506c7bbe9feb8468fad6c51a88ca1393ca6b8b486ea04bec3c1",
-   "iso_checksum_type": "sha256",
-   "headless": "false",
-   "output_directory": "images",
-   "vm_name": "east.qcow2",
-   "accelerator": "kvm",
-   "disk_size": "20480",
-   "boot_wait": "5s",
-   "http_directory": "ks",
-   "boot_command": [ "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/east-kickstart <enter><wait>" ],
-   "ssh_username": "root",
-   "ssh_password": "r3dh4t1!",
-   "ssh_wait_timeout":"1000s",
-   "shutdown_command": "shutdown -P now",
-   "format": "qcow2"
-   },
-   { "name": "west",
-     "type": "qemu",
-     "iso_url": "/ISOs/CentOS-7-x86_64-DVD-1810.iso",
-     "iso_checksum": "6d44331cc4f6c506c7bbe9feb8468fad6c51a88ca1393ca6b8b486ea04bec3c1",
-     "iso_checksum_type": "sha256",
-     "headless": "false",
-     "output_directory": "images",
-     "vm_name": "west.qcow2",
-     "accelerator": "kvm",
-     "disk_size": "20480",
-     "boot_wait": "5s",
-     "http_directory": "ks",
-     "boot_command": [ "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/west-kickstart <enter><wait>" ],
-     "ssh_username": "root",
-     "ssh_password": "r3dh4t1!",
-     "ssh_wait_timeout":"1000s",
-     "shutdown_command": "shutdown -P now",
-     "format": "qcow2"
-     }]
+  "variables":
+  {
+    "pub_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDEwBRAQKxoky1hxKMlWbbqKo1MXgdqTWFi+vlnSO7EYgMt8K7fzXh9lgdACChP1WeAWDgc8KHsr33DrAx6hCMLwz8VYn82ih1C9+89xXO25diK0Zlhvlo18NzkHQavRNIJMW91iuQ1ThAO3UTA4paIrdCW2Z4ZQ1Vr5n8EEKnVwNvJmTdkopVYaVVf3HvyHN/R3bcKc2uEmxzpV9xQYKN5dtioxDToJocwxln9NWoOXoFfLU9b3bH/2UjX2KzoffFBENuEuJ/SETlYFhEGbCEz9fAktNtnkeUohTF1np3ZncixCtAQgh6ZxyJjYCiAm6Uy2s5QppKXKcPAs3Pr89OV pthomison@tardis.pthomison.com"
+  },
+  "builders":
+  [
+    { "name": "east",
+      "type": "qemu",
+      "iso_url": "/ISOs/CentOS-7-x86_64-DVD-1810.iso",
+      "iso_checksum": "6d44331cc4f6c506c7bbe9feb8468fad6c51a88ca1393ca6b8b486ea04bec3c1",
+      "iso_checksum_type": "sha256",
+      "headless": "false",
+      "output_directory": "images",
+      "vm_name": "east.qcow2",
+      "accelerator": "kvm",
+      "disk_size": "20480",
+      "boot_wait": "5s",
+      "http_directory": "ks",
+      "boot_command": [ "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/east-kickstart <enter><wait>" ],
+      "ssh_username": "root",
+      "ssh_password": "r3dh4t1!",
+      "ssh_wait_timeout":"1000s",
+      "shutdown_command": "shutdown -P now",
+      "format": "qcow2"
+    },
+    { "name": "west",
+      "type": "qemu",
+      "iso_url": "/ISOs/CentOS-7-x86_64-DVD-1810.iso",
+      "iso_checksum": "6d44331cc4f6c506c7bbe9feb8468fad6c51a88ca1393ca6b8b486ea04bec3c1",
+      "iso_checksum_type": "sha256",
+      "headless": "false",
+      "output_directory": "images",
+      "vm_name": "west.qcow2",
+      "accelerator": "kvm",
+      "disk_size": "20480",
+      "boot_wait": "5s",
+      "http_directory": "ks",
+      "boot_command": [ "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/west-kickstart <enter><wait>" ],
+      "ssh_username": "root",
+      "ssh_password": "r3dh4t1!",
+      "ssh_wait_timeout":"1000s",
+      "shutdown_command": "shutdown -P now",
+      "format": "qcow2"
+    }
+  ],
+  "provisioners":
+  [
+    {
+      "type": "shell",
+      "inline": ["mkdir -p /root/.ssh/; touch /root/.ssh/authorized_keys; echo {{user `pub_key`}} >> /root/.ssh/authorized_keys"]
+    }
+  ]
 }

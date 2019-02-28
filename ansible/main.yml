@@ -1,0 +1,114 @@
+---
+- name: Deploying IPSec
+  hosts: all
+  user: root
+  tasks:
+    - name: Install OVS
+      yum:
+        name: openvswitch
+        state: present
+
+    - name: Start OVS
+      service:
+        name: openvswitch
+        state: started
+
+    - name: Stop firewalld
+      service:
+        name: firewalld
+        state: stopped
+
+    - name: Test for ovstun-sw device
+      shell: ip link show ovstun
+      ignore_errors: true
+      register: ovstun_test
+
+    - name: Create virtual link device
+      shell: ip link add dev ovstun-sw type veth peer name ovstun
+      when: ovstun_test['failed']
+
+    - name: Enable ovstun-sw device
+      shell: ip link set ovstun-sw up
+
+    - name: Enable ovstun device
+      shell: ip link set ovstun up
+
+    - name: Test for tunnel IP
+      shell: ip addr show ovstun | egrep "(([0-9]{1,3})\.){3}([0-9]{1,3})"
+      ignore_errors: true
+      register: iptun_test
+
+    - name: Set ip on ovstun device
+      shell: ip addr add {{ tun_ip }}/24 dev ovstun
+      when: iptun_test['failed']
+
+    - name: Test for ipsec_br
+      shell: ovs-vsctl br-exists ipsec_br
+      ignore_errors: true
+      register: br_test
+
+    - name: Create OVS bridge
+      shell: ovs-vsctl add-br ipsec_br
+      when: br_test['failed']
+
+    - name: Test for ovstun port
+      shell: ovs-vsctl list-ports ipsec_br | grep ovstun-sw
+      ignore_errors: true
+      register: ovstun_port_test
+
+    - name: Connect ovstun-sw & ipsec_br
+      shell: ovs-vsctl add-port ipsec_br ovstun-sw
+      when: ovstun_port_test['failed']
+
+    - name: Test for vxlan port
+      shell: ovs-vsctl list-ports ipsec_br | grep vxlan_ipsec
+      ignore_errors: true
+      register: vxlan_port_test
+
+    - name: Create vxlan port
+      shell: ovs-vsctl add-port ipsec_br vxlan_ipsec -- set interface vxlan_ipsec type=vxlan options:remote_ip={{ hostvars[tunnel_partner]['tun_ip'] }} options:key=6000
+      when: vxlan_port_test['failed']
+
+      #ipsec
+
+    - name: Install libreswan
+      yum:
+        name: libreswan
+        state: present
+
+    - name: Init nss db
+      shell: ipsec initnss --nssdir /etc/ipsec.d
+      args:
+        creates: /etc/ipsec.d/cert9.db
+
+    - name: Grab ckaid of key
+      shell: cat /etc/ipsec.secrets | grep ckaid | cut -f 2 -d '='
+      register: ckaid_test
+
+    - name: Create hostkey
+      shell: ipsec newhostkey --output /etc/ipsec.secrets
+      when: ckaid_test['stdout'] == ''
+
+    - name: Grab ckaid of key
+      shell: cat /etc/ipsec.secrets | grep ckaid | cut -f 2 -d '='
+      register: ckaid
+
+    - name: Grab public key
+      shell: ipsec showhostkey --left --ckaid {{ ckaid['stdout'] }} | grep leftrsasigkey | sed 's/leftrsasigkey=/#/' | cut -f 2 -d '#'
+      register: host_pub_key
+
+    - debug: var=ckaid
+    - debug: var=host_pub_key
+
+    - name: Template in ipsec.conf
+      template:
+        src: ipsec.conf.j2
+        dest: /etc/ipsec.conf
+
+    - name: Start ipsec
+      service:
+        name: ipsec
+        state: started
+
+    - name: Add tunnel
+      shell: ipsec auto --add mytunnel
